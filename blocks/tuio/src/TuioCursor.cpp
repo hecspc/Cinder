@@ -37,13 +37,13 @@ namespace cinder { namespace tuio {
 		mFingerId = fingerId;
 		mXPos = xpos;
 		mYPos = ypos;
-		mRadius = DEFAULT_RADIUS;
+		mRadius = 3 * DEFAULT_RADIUS;
 		createLabel();
 	}
 	
 	Cursor::Cursor(Cursor *cursor) : Container(cursor){
 		mFingerId = cursor->getFingerId();
-		mRadius = DEFAULT_RADIUS;
+		mRadius = 3 * DEFAULT_RADIUS;
 		createLabel();
 	}
 	
@@ -60,14 +60,17 @@ namespace cinder { namespace tuio {
 		label << "Session ID: " << getSessionId();
 		layout.addLine(label.str());
 		
-		mTexture = gl::Texture(layout.render(true));
+		//mTexture = gl::Texture(layout.render(true));
 	}
 	
 	void Cursor::draw(Vec2f windowSize){
-		gl::color(ColorA(1.0f, 1.0f, 1.0f, 1.0f));
-		if (mTexture)
-			gl::draw(mTexture, Vec2f(mXPos * windowSize.x + mRadius * 1.3, mYPos * windowSize.y - 1.5 * mRadius));
-		gl::color(Color(1.0f, 1.0f, 1.0f));
+		
+		gl::color(ColorA(1.0f, 1.0f, 1.0f, 0.6f));
+		if (mRadius > DEFAULT_RADIUS){
+			mRadius += (DEFAULT_RADIUS - mRadius) / 10.0f;
+		}else{
+			mRadius = DEFAULT_RADIUS;
+		}
 		gl::drawSolidCircle(Vec2f(mXPos * windowSize.x, mYPos * windowSize.y), mRadius);
 
 	}

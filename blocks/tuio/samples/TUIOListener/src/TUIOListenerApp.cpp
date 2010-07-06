@@ -80,8 +80,7 @@ void TUIOListenerApp::oscMessage(osc::Message *message){
 
 void TUIOListenerApp::update(){
 	
-	if (tuio.isConnected())
-		tuio.getMessage();
+	
 }
 
 

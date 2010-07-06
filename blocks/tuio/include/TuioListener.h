@@ -49,8 +49,6 @@ namespace cinder  { namespace tuio {
 		void disconnect();
 		bool isConnected(){ return mConnected;}
 		
-		void getMessage();
-		
 		void drawCursors(Vec2f windowSize);
 		void drawObjects(Vec2f windowSize);
 		
@@ -75,6 +73,9 @@ namespace cinder  { namespace tuio {
 		void addOSCMessageCallback(boost::function<void(osc::Message*)> callback);
 		
 		//TODO: Implementation for removing callbacks
+		
+	private:
+		void OSCMessageReceived(osc::Message *message);
 		
 	private:
 		
