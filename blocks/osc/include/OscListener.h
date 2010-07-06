@@ -27,6 +27,9 @@
 #pragma once
 
 #include "cinder/Cinder.h"
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+
 #include "OscMessage.h"
 #include "OscArg.h"
 
@@ -42,6 +45,7 @@ namespace cinder { namespace osc {
 		
 		void shutdown();
 		
+		void addMessageCallback(boost::function<void(osc::Message*)> callback);
 		bool hasWaitingMessages();
 		
 		bool getNextMessage(Message*);
@@ -49,6 +53,7 @@ namespace cinder { namespace osc {
 	private:
 		
 		 shared_ptr<class OscListener>   oscListener;
+		
 	
 	};
 

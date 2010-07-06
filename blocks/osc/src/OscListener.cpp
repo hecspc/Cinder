@@ -37,6 +37,7 @@
 #include <iostream>
 #include <assert.h>
 #include <deque>
+#include <list>
 using std::deque;
 
 namespace cinder { namespace osc {
@@ -50,7 +51,7 @@ namespace cinder { namespace osc {
 		void setup(int listen_port);
 		
 		bool hasWaitingMessages();
-		
+		void addMessageCallback(boost::function<void(Message*)> callback);
 		bool getNextMessage(Message*);
 		
 		void shutdown();
@@ -70,7 +71,7 @@ namespace cinder { namespace osc {
 		std::mutex mMutex;		
 		shared_ptr< std::thread > mThread;
 		
-		
+		std::list< boost::function<void(Message*)> > mOSCMessageCallbacks;
 		bool mSocketHasShutdown;
 		
 	};
@@ -141,9 +142,14 @@ void OscListener::ProcessMessage( const ::osc::ReceivedMessage &m, const IpEndpo
 	
 	boost::mutex::scoped_lock lock(mMutex);
 	
-	mMessages.push_back(message);
-	
-	
+	if (mOSCMessageCallbacks.size() == 0){
+		mMessages.push_back(message);
+	}else{
+		std::list< boost::function<void(Message*)> >::iterator callbackIt;
+		for (callbackIt = mOSCMessageCallbacks.begin(); callbackIt != mOSCMessageCallbacks.end(); callbackIt++){
+			(*callbackIt)(message);
+		}
+	}
 
 }
 
@@ -176,6 +182,11 @@ bool OscListener::getNextMessage(Message* message){
 	
 	return true;
 }
+
+void OscListener::addMessageCallback(boost::function<void(osc::Message*)> callback){
+	mOSCMessageCallbacks.push_back(callback);
+	
+}
 	
 
 	
@@ -199,6 +210,9 @@ bool OscListener::getNextMessage(Message* message){
 		return oscListener->getNextMessage(message);
 	}
 	
+	void Listener::addMessageCallback(boost::function<void(Message*)> callback){
+		oscListener->addMessageCallback(callback);
+	}
 	
 	
 	
