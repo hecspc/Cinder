@@ -27,10 +27,10 @@
 #include "cinder/Thread.h" 
 #include "cinder/Utilities.h"
 #include "OscListener.h"
-#include "osc/OscTypes.h"
-#include "osc/OscPacketListener.h"
-#include "osc/OscReceivedElements.h"
-#include "ip/UdpSocket.h"
+#include "OscTypes.h"
+#include "OscPacketListener.h"
+#include "OscReceivedElements.h"
+#include "UdpSocket.h"
 
 #include <boost/bind.hpp>
 
@@ -185,6 +185,10 @@ bool OscListener::getNextMessage(Message* message){
 	
 	void Listener::setup(int listen_port){
 		oscListener->setup(listen_port);
+	}
+	
+	void Listener::shutdown(){
+		oscListener->shutdown();
 	}
 	
 	bool Listener::hasWaitingMessages(){

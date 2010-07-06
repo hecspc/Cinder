@@ -40,6 +40,8 @@ namespace cinder { namespace osc {
 		
 		void setup(int listen_port);
 		
+		void shutdown();
+		
 		bool hasWaitingMessages();
 		
 		bool getNextMessage(Message*);
