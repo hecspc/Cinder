@@ -45,7 +45,9 @@ class TUIOListenerApp : public AppBasic {
 	void cursorUpdated(tuio::Cursor *cursor);
 	void cursorRemoved(tuio::Cursor *cursor);
 	void oscMessage(osc::Message *message);
+
 	tuio::Listener tuio;
+	int mCallbackIndex;
 };
 
 void TUIOListenerApp::prepareSettings(Settings *settings){
@@ -57,9 +59,10 @@ void TUIOListenerApp::setup(){
 	tuio.connect(3333);
 	
 	tuio.addCursorAddedCallback(boost::bind(&TUIOListenerApp::cursorAdded, this, _1));
-	tuio.addCursorUpdatedCallback(boost::bind(&TUIOListenerApp::cursorUpdated, this, _1));
+	mCallbackIndex = tuio.addCursorUpdatedCallback(boost::bind(&TUIOListenerApp::cursorUpdated, this, _1));
 	tuio.addCursorRemovedCallback(boost::bind(&TUIOListenerApp::cursorRemoved, this, _1));
 	tuio.addOSCMessageCallback(boost::bind(&TUIOListenerApp::oscMessage, this, _1));
+	
 }
 
 void TUIOListenerApp::cursorAdded(tuio::Cursor *cursor){
@@ -80,7 +83,10 @@ void TUIOListenerApp::oscMessage(osc::Message *message){
 
 void TUIOListenerApp::update(){
 	
-	
+	if (getElapsedSeconds() > 10.0f && mCallbackIndex > -1){
+		tuio.removeCursorUpdatedCallback(mCallbackIndex);
+		mCallbackIndex = -1;
+	}
 }
 
 

@@ -31,6 +31,7 @@
 		8F74F96F11E368C000D02F4D /* OscListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F74F95111E368C000D02F4D /* OscListener.cpp */; };
 		8F74F97011E368C000D02F4D /* OscMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F74F95211E368C000D02F4D /* OscMessage.cpp */; };
 		8F74F97111E368C000D02F4D /* OscSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F74F95311E368C000D02F4D /* OscSender.cpp */; };
+		8FE9FD5911E494190063DA98 /* TuioObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8FE9FD5811E494190063DA98 /* TuioObject.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -87,6 +88,7 @@
 		8F74F95111E368C000D02F4D /* OscListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscListener.cpp; sourceTree = "<group>"; };
 		8F74F95211E368C000D02F4D /* OscMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscMessage.cpp; sourceTree = "<group>"; };
 		8F74F95311E368C000D02F4D /* OscSender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscSender.cpp; sourceTree = "<group>"; };
+		8FE9FD5811E494190063DA98 /* TuioObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TuioObject.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -234,6 +236,7 @@
 			children = (
 				8F0DDA4011E35B1E007740DD /* TuioCursor.cpp */,
 				8F0DDA4111E35B1E007740DD /* TuioListener.cpp */,
+				8FE9FD5811E494190063DA98 /* TuioObject.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -407,6 +410,7 @@
 				8F74F96F11E368C000D02F4D /* OscListener.cpp in Sources */,
 				8F74F97011E368C000D02F4D /* OscMessage.cpp in Sources */,
 				8F74F97111E368C000D02F4D /* OscSender.cpp in Sources */,
+				8FE9FD5911E494190063DA98 /* TuioObject.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -37,7 +37,7 @@
 #include <iostream>
 #include <assert.h>
 #include <deque>
-#include <list>
+#include <map>
 using std::deque;
 
 namespace cinder { namespace osc {
@@ -51,7 +51,8 @@ namespace cinder { namespace osc {
 		void setup(int listen_port);
 		
 		bool hasWaitingMessages();
-		void addMessageCallback(boost::function<void(Message*)> callback);
+		int addMessageCallback(boost::function<void(Message*)> callback);
+		void removeMessageCallback(int callbackIndex);
 		bool getNextMessage(Message*);
 		
 		void shutdown();
@@ -71,13 +72,15 @@ namespace cinder { namespace osc {
 		std::mutex mMutex;		
 		shared_ptr< std::thread > mThread;
 		
-		std::list< boost::function<void(Message*)> > mOSCMessageCallbacks;
+		std::map< int, boost::function<void(Message*)> > mOSCMessageCallbacks;
+		int mOSCMessageCallbackIndex;
 		bool mSocketHasShutdown;
 		
 	};
 
 OscListener::OscListener(){
 	mListen_socket = NULL;
+	mOSCMessageCallbackIndex = -1;
 }
 
 void OscListener::setup(int listen_port){
@@ -145,9 +148,9 @@ void OscListener::ProcessMessage( const ::osc::ReceivedMessage &m, const IpEndpo
 	if (mOSCMessageCallbacks.size() == 0){
 		mMessages.push_back(message);
 	}else{
-		std::list< boost::function<void(Message*)> >::iterator callbackIt;
+		std::map< int, boost::function<void(Message*)> >::iterator callbackIt;
 		for (callbackIt = mOSCMessageCallbacks.begin(); callbackIt != mOSCMessageCallbacks.end(); callbackIt++){
-			(*callbackIt)(message);
+			(*callbackIt).second(message);
 		}
 	}
 
@@ -183,9 +186,14 @@ bool OscListener::getNextMessage(Message* message){
 	return true;
 }
 
-void OscListener::addMessageCallback(boost::function<void(osc::Message*)> callback){
-	mOSCMessageCallbacks.push_back(callback);
+int OscListener::addMessageCallback(boost::function<void(osc::Message*)> callback){
+	mOSCMessageCallbacks[++mOSCMessageCallbackIndex] = callback;
+	return mOSCMessageCallbackIndex;
 	
+}
+
+void OscListener::removeMessageCallback(int callbackIndex){
+	mOSCMessageCallbacks.erase(callbackIndex);
 }
 	
 
@@ -210,8 +218,12 @@ void OscListener::addMessageCallback(boost::function<void(osc::Message*)> callba
 		return oscListener->getNextMessage(message);
 	}
 	
-	void Listener::addMessageCallback(boost::function<void(Message*)> callback){
-		oscListener->addMessageCallback(callback);
+	int Listener::addMessageCallback(boost::function<void(Message*)> callback){
+		return oscListener->addMessageCallback(callback);
+	}
+	
+	void Listener::removeMessageCallback(int callbackIndex){
+		oscListener->removeMessageCallback(callbackIndex);
 	}
 	
 	

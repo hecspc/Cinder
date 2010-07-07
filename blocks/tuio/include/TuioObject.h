@@ -28,6 +28,7 @@
 
 #include "cinder/Cinder.h"
 #include "cinder/CinderMath.h"
+#include "cinder/Vector.h"
 
 #include "TuioContainer.h"
 
@@ -36,41 +37,17 @@ namespace cinder { namespace tuio {
 	class Object : public Container {
 	public:
 		
-		Object(long sessionId, int fiducialId, float xpos, float ypos, float angle) : Container(sessionId, xpos, ypos){
-			mFiducialId = fiducialId;
-			mAngle = angle;
-			mRotationSpeed = 0.0f;
-			mRotationAccel = 0.0f;
-			mXPos = xpos;
-			mYPos = ypos;
-		}
+		Object(long sessionId, int fiducialId, float xpos, float ypos, float angle);
 		
+		Object(Object *object);
 		
-		Object(Object *object) : Container(object) {
-			mFiducialId = object->getFiducialId();
-			mAngle = object->getAngle();
-			mRotationSpeed = object->getRotationSpeed();
-			mRotationAccel = object->getRotationAccel();
-			mXPos = object->getX();
-			mYPos = object->getY();
-		}
+		~Object();
 		
-		~Object(){};
+		void update(float xpos, float ypos, float angle, float xspeed, float yspeed, float rotationSpeed, float motionAccel, float rotationAccel);
 		
-		void update(float xpos, float ypos, float angle, float xspeed, float yspeed, float rotationSpeed, float motionAccel, float rotationAccel){
-			Container::update(xpos, ypos, xspeed, yspeed, motionAccel);
-			
-			mAngle = angle;
-			mRotationSpeed = rotationSpeed;
-			mRotationAccel = rotationAccel;
-		}
+		void udpate(Object *object);
 		
-		void udpate(Object *object){
-			Container::update(object);
-			mAngle = object->getAngle();
-			mRotationSpeed = object->getRotationSpeed();
-			mRotationAccel = object->getRotationAccel();
-		}
+		void draw(Vec2f windowSize);
 		
 		int getFiducialId() { 
 			return mFiducialId; 

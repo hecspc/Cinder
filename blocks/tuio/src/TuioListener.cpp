@@ -34,6 +34,9 @@ namespace cinder { namespace tuio {
 	
 	Listener::Listener(){
 		mCurrentFrame = mLastFrame = mMaxFingerID = -1;
+		mCursorAddedCallbackIndex = mCursorUpdatedCallbackIndex = mCursorRemovedCallbackIndex = -1;
+		mObjectAddedCallbackIndex = mObjectUpdatedCallbackIndex = mObjectRemovedCallbackIndex = -1;
+		mOSCMessageCallbackIndex = -1;
 	}
 	
 	void Listener::connect(int port){
@@ -67,8 +70,6 @@ namespace cinder { namespace tuio {
 	
 	void Listener::OSCMessageReceived(osc::Message *message){
 		
-		
-		
 		if (message->getAddress() == "/tuio/2Dobj"){
 			if (message->getArgAsString(0) == "set"){
 				if ((mCurrentFrame < mLastFrame) && (mCurrentFrame > 0)) return;
@@ -94,9 +95,9 @@ namespace cinder { namespace tuio {
 					Object *addedObject = new Object(sid, fiducial, xpos, ypos, angle);
 					mObjects.push_back(addedObject);
 					
-					std::list< boost::function<void(Object*)> >::iterator callbackObjectIt;
+					std::map< int, boost::function<void(Object*)> >::iterator callbackObjectIt;
 					for (callbackObjectIt = mObjectAddedCallbacks.begin(); callbackObjectIt != mObjectAddedCallbacks.end(); callbackObjectIt++){
-						(*callbackObjectIt)(addedObject);
+						(*callbackObjectIt).second(addedObject);
 					}
 					
 						
@@ -106,9 +107,9 @@ namespace cinder { namespace tuio {
 					      ((*it)->getMotionAccel()!=maccel) || ((*it)->getRotationAccel()!=raccel)) {
 					(*it)->update(xpos, ypos, angle, xspeed, yspeed, rspeed, maccel, raccel);
 						
-					std::list< boost::function<void(Object*)> >::iterator callbackObjectIt;
+					std::map< int, boost::function<void(Object*)> >::iterator callbackObjectIt;
 					for (callbackObjectIt = mObjectUpdatedCallbacks.begin(); callbackObjectIt != mObjectUpdatedCallbacks.end(); callbackObjectIt++){
-						(*callbackObjectIt)(*it);
+						(*callbackObjectIt).second(*it);
 					}
 					
 				}
@@ -130,9 +131,9 @@ namespace cinder { namespace tuio {
 						Object *deleteObject = (*objectIt);
 						if (deleteObject->getSessionId() == *aliveIt){
 							
-							std::list< boost::function<void(Object*)> >::iterator callbackObjectIt;
+							std::map< int, boost::function<void(Object*)> >::iterator callbackObjectIt;
 							for (callbackObjectIt = mObjectRemovedCallbacks.begin(); callbackObjectIt != mObjectRemovedCallbacks.end(); callbackObjectIt++){
-								(*callbackObjectIt)(deleteObject);
+								(*callbackObjectIt).second(deleteObject);
 							}
 							
 							mObjects.erase(objectIt);
@@ -184,9 +185,9 @@ namespace cinder { namespace tuio {
 					mCursors.push_back(addCursor);
 						
 						
-					std::list< boost::function<void(Cursor*)> >::iterator callbackIt;
+					std::map< int, boost::function<void(Cursor*)> >::iterator callbackIt;
 					for (callbackIt = mCursorAddedCallbacks.begin(); callbackIt != mCursorAddedCallbacks.end(); callbackIt++){
-						(*callbackIt)(addCursor);
+						(*callbackIt).second(addCursor);
 					}
 						
 						
@@ -197,9 +198,9 @@ namespace cinder { namespace tuio {
 					(*it)->update(xpos, ypos, xspeed, yspeed, maccel);
 						
 						
-					std::list< boost::function<void(Cursor*)> >::iterator callbackIt;
+					std::map< int, boost::function<void(Cursor*)> >::iterator callbackIt;
 					for (callbackIt = mCursorUpdatedCallbacks.begin(); callbackIt != mCursorUpdatedCallbacks.end(); callbackIt++){
-						(*callbackIt)(*it);
+						(*callbackIt).second(*it);
 					}
 						
 						
@@ -226,9 +227,9 @@ namespace cinder { namespace tuio {
 						if (deleteCursor->getSessionId() == *aliveIt){
 							
 								
-							std::list< boost::function<void(Cursor*)> >::iterator callbackIt;
+							std::map< int, boost::function<void(Cursor*)> >::iterator callbackIt;
 							for (callbackIt = mCursorRemovedCallbacks.begin(); callbackIt != mCursorRemovedCallbacks.end(); callbackIt++){
-								(*callbackIt)(deleteCursor);
+								(*callbackIt).second(deleteCursor);
 							}
 																
 							mCursors.erase(cursorIt);
@@ -270,9 +271,9 @@ namespace cinder { namespace tuio {
 			}
 		}else {
 				
-			std::list< boost::function<void(osc::Message*)> >::iterator callbackIt;
+			std::map< int, boost::function<void(osc::Message*)> >::iterator callbackIt;
 			for (callbackIt = mOSCMessageCallbacks.begin(); callbackIt != mOSCMessageCallbacks.end(); callbackIt++){
-				(*callbackIt)(message);
+				(*callbackIt).second(message);
 			}
 				
 
@@ -293,7 +294,7 @@ namespace cinder { namespace tuio {
 		std::list<Object*>::iterator it;
 		for (it = mObjects.begin(); it != mObjects.end(); it++) {
 			Object *blob = (*it);
-			
+			blob->draw(windowSize);
 		}
 	}
 	
@@ -323,32 +324,73 @@ namespace cinder { namespace tuio {
 		return NULL;
 	}
 	
-	void Listener::addCursorAddedCallback(boost::function<void(Cursor*)> callback){
-		mCursorAddedCallbacks.push_back(callback);
+	// Callbacks for Cursors
+	
+	int Listener::addCursorAddedCallback(boost::function<void(Cursor*)> callback){
+		mCursorAddedCallbacks[++mCursorAddedCallbackIndex] = callback;
+		return mCursorAddedCallbackIndex;
 	}
 	
-	void Listener::addCursorUpdatedCallback(boost::function<void(Cursor*)> callback){
-		mCursorUpdatedCallbacks.push_back(callback);
+	int Listener::addCursorUpdatedCallback(boost::function<void(Cursor*)> callback){
+		mCursorUpdatedCallbacks[++mCursorUpdatedCallbackIndex] = callback;
+		return mCursorUpdatedCallbackIndex;
 	}
 	
-	void Listener::addCursorRemovedCallback(boost::function<void(Cursor*)> callback){
-		mCursorRemovedCallbacks.push_back(callback);
+	int Listener::addCursorRemovedCallback(boost::function<void(Cursor*)> callback){
+		mCursorRemovedCallbacks[++mCursorRemovedCallbackIndex] = callback;
+		return mCursorRemovedCallbackIndex;
 	}
 	
-	void Listener::addObjectAddedCallback(boost::function<void(Object*)> callback){
-		mObjectAddedCallbacks.push_back(callback);
+	void Listener::removeCursorAddedCallback(int callbackIndex){
+		mCursorAddedCallbacks.erase(callbackIndex);
 	}
 	
-	void Listener::addObjectUpdatedCallback(boost::function<void(Object*)> callback){
-		mObjectUpdatedCallbacks.push_back(callback);
+	void Listener::removeCursorUpdatedCallback(int callbackIndex){
+		mCursorUpdatedCallbacks.erase(callbackIndex);
 	}
 	
-	void Listener::addObjectRemovedCallback(boost::function<void(Object*)> callback){
-		mObjectRemovedCallbacks.push_back(callback);
+	void Listener::removeCursorRemovedCallback(int callbackIndex){
+		mCursorRemovedCallbacks.erase(callbackIndex);
 	}
 	
-	void Listener::addOSCMessageCallback(boost::function<void(osc::Message*)> callback){
-		mOSCMessageCallbacks.push_back(callback);
+	// Callbacks for Objects
+	
+	int Listener::addObjectAddedCallback(boost::function<void(Object*)> callback){
+		mObjectAddedCallbacks[++mObjectAddedCallbackIndex] = callback;
+		return mObjectAddedCallbackIndex;
+	}
+	
+	int Listener::addObjectUpdatedCallback(boost::function<void(Object*)> callback){
+		mObjectUpdatedCallbacks[++mObjectUpdatedCallbackIndex] = callback;
+		return mObjectUpdatedCallbackIndex;
+	}
+	
+	int Listener::addObjectRemovedCallback(boost::function<void(Object*)> callback){
+		mObjectRemovedCallbacks[++mObjectRemovedCallbackIndex] = callback;
+		return mObjectRemovedCallbackIndex;
+	}
+	
+	void Listener::removeObjectAddedCallback(int callbackIndex){
+		mObjectAddedCallbacks.erase(callbackIndex);
+	}
+	
+	void Listener::removeObjectUpdatedCallback(int callbackIndex){
+		mObjectUpdatedCallbacks.erase(callbackIndex);
+	}
+	
+	void Listener::removeObjectRemovedCallback(int callbackIndex){
+		mObjectRemovedCallbacks.erase(callbackIndex);
+	}
+	
+	// Callbacks for OSC Messages
+	
+	int Listener::addOSCMessageCallback(boost::function<void(osc::Message*)> callback){
+		mOSCMessageCallbacks[++mOSCMessageCallbackIndex] = callback;
+		return mOSCMessageCallbackIndex;
+	}
+	
+	void Listener::removeOSCMessageCallback(int callbackIndex){
+		mOSCMessageCallbacks.erase(callbackIndex);
 	}
 	
 } // namespace tuio

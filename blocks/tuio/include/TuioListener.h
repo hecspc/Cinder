@@ -32,6 +32,7 @@
 #include "OscMessage.h"
 
 #include <list>
+#include <map>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
@@ -54,25 +55,28 @@ namespace cinder  { namespace tuio {
 		
 		std::list<Object*> getTuioObjects();
 		std::list<Cursor*> getTuioCursors();
-		
 		Object* getTuioObject(long sessionId);
 		Cursor* getTuioCursor(long sessionId);
 		
-		
 		// Callbacks for Cursors
-		void addCursorAddedCallback(boost::function<void(Cursor*)> callback);
-		void addCursorUpdatedCallback(boost::function<void(Cursor*)> callback);
-		void addCursorRemovedCallback(boost::function<void(Cursor*)> callback);
+		int addCursorAddedCallback(boost::function<void(Cursor*)> callback);
+		int addCursorUpdatedCallback(boost::function<void(Cursor*)> callback);
+		int addCursorRemovedCallback(boost::function<void(Cursor*)> callback);
+		void removeCursorAddedCallback(int callbackIndex);
+		void removeCursorUpdatedCallback(int callbackIndex);
+		void removeCursorRemovedCallback(int callbackIndex);
 		
 		// Callbacks for Objects
-		void addObjectAddedCallback(boost::function<void(Object*)> callback);
-		void addObjectUpdatedCallback(boost::function<void(Object*)> callback);
-		void addObjectRemovedCallback(boost::function<void(Object*)> callback);
+		int addObjectAddedCallback(boost::function<void(Object*)> callback);
+		int addObjectUpdatedCallback(boost::function<void(Object*)> callback);
+		int addObjectRemovedCallback(boost::function<void(Object*)> callback);
+		void removeObjectAddedCallback(int callbackIndex);
+		void removeObjectUpdatedCallback(int callbackIndex);
+		void removeObjectRemovedCallback(int callbackIndex);
 		
 		// Callback for OSC Messages
-		void addOSCMessageCallback(boost::function<void(osc::Message*)> callback);
-		
-		//TODO: Implementation for removing callbacks
+		int addOSCMessageCallback(boost::function<void(osc::Message*)> callback);
+		void removeOSCMessageCallback(int callbackIndex);
 		
 	private:
 		void OSCMessageReceived(osc::Message *message);
@@ -90,15 +94,19 @@ namespace cinder  { namespace tuio {
 		std::list<long> mAliveCursors;
 		std::list<long> mNewCursors;
 		
-		std::list< boost::function<void(Cursor*)> > mCursorAddedCallbacks;
-		std::list< boost::function<void(Cursor*)> > mCursorUpdatedCallbacks;
-		std::list< boost::function<void(Cursor*)> > mCursorRemovedCallbacks;
+		std::map< int, boost::function<void(Cursor*)> > mCursorAddedCallbacks;
+		std::map< int, boost::function<void(Cursor*)> > mCursorUpdatedCallbacks;
+		std::map< int, boost::function<void(Cursor*)> > mCursorRemovedCallbacks;
 		
-		std::list< boost::function<void(Object*)> > mObjectAddedCallbacks;
-		std::list< boost::function<void(Object*)> > mObjectUpdatedCallbacks;
-		std::list< boost::function<void(Object*)> > mObjectRemovedCallbacks;
+		std::map< int, boost::function<void(Object*)> > mObjectAddedCallbacks;
+		std::map< int, boost::function<void(Object*)> > mObjectUpdatedCallbacks;
+		std::map< int, boost::function<void(Object*)> > mObjectRemovedCallbacks;
 		
-		std::list< boost::function<void(osc::Message*)> > mOSCMessageCallbacks;
+		std::map< int, boost::function<void(osc::Message*)> > mOSCMessageCallbacks;
+		
+		int mCursorAddedCallbackIndex, mCursorUpdatedCallbackIndex, mCursorRemovedCallbackIndex;
+		int mObjectAddedCallbackIndex, mObjectUpdatedCallbackIndex, mObjectRemovedCallbackIndex;
+		int mOSCMessageCallbackIndex;
 		
 		int mCurrentFrame;
 		int mLastFrame;
@@ -106,7 +114,6 @@ namespace cinder  { namespace tuio {
 		
 		bool mConnected;
 	};
-
 	
 } // namespace tuio
 } // namespace cinder

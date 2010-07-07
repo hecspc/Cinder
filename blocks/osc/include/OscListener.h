@@ -42,17 +42,19 @@ namespace cinder { namespace osc {
 		Listener();
 		
 		void setup(int listen_port);
-		
 		void shutdown();
 		
-		void addMessageCallback(boost::function<void(osc::Message*)> callback);
-		bool hasWaitingMessages();
+		// Callback methods
+		int addMessageCallback(boost::function<void(osc::Message*)> callback);
+		void removeMessageCallback(int callbackIndex);
 		
+		// Loop methods (not used if there is any callback function added)
+		bool hasWaitingMessages();
 		bool getNextMessage(Message*);
 		
 	private:
 		
-		 shared_ptr<class OscListener>   oscListener;
+		shared_ptr<class OscListener>   oscListener;
 		
 	
 	};
