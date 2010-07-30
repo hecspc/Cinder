@@ -40,11 +40,11 @@ namespace cinder { namespace osc {
 		~OscSender();
 		
 		void setup(std::string hostname, int port);
+		void shutdown();
 		
 		void sendMessage(Message& message);
 		void sendBundle(Bundle& bundle);
 		
-		void shutdown();
 	private:
 		
 		void appendBundle(Bundle& bundle, ::osc::OutboundPacketStream& p);
@@ -137,6 +137,10 @@ void OscSender::appendMessage(Message& message, ::osc::OutboundPacketStream& p){
 		oscSender->setup(hostname, port);
 	}
 	
+	void Sender::shutdown(){
+		oscSender->shutdown();
+	}
+	
 	void Sender::sendMessage(Message& message){
 		oscSender->sendMessage(message);
 	}
@@ -144,6 +148,8 @@ void OscSender::appendMessage(Message& message, ::osc::OutboundPacketStream& p){
 	void Sender::sendBundle(Bundle& bundle){
 		oscSender->sendBundle(bundle);
 	}
+	
+	
 	
 }// namespace cinder
 }// namespace osc

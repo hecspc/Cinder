@@ -28,7 +28,15 @@
 
 #include "cinder/Cinder.h"
 
+#include <list>
+
 #include "TuioPoint.h"
+
+#define TUIO_ADDED 0
+#define TUIO_ACCELERATING 1
+#define TUIO_DECELERATING 2
+#define TUIO_STOPPED 3
+#define TUIO_REMOVED 4
 
 namespace cinder { namespace tuio {
 	
@@ -40,8 +48,11 @@ namespace cinder { namespace tuio {
 			mYSpeed = 0.0f;
 			mMotionSpeed = 0.0f;
 			mMotionAccel = 0.0f;
-			mXPos = xpos;
-			mYPos = ypos;
+			Point point(mCurrentTime, mXPos, mYPos);
+			mPath.push_back(point);
+			
+			
+			mState = TUIO_ADDED;
 		}
 		
 		
@@ -51,8 +62,22 @@ namespace cinder { namespace tuio {
 			mYSpeed = container->getYSpeed();
 			mMotionSpeed = container->getMotionSpeed();
 			mMotionAccel = container->getMotionAccel();
-			mXPos = container->getX();
-			mYPos = container->getY();
+			Point point(mCurrentTime, mXPos, mYPos);
+			mPath.push_back(point);
+			
+			mState = TUIO_ADDED;
+		}
+		
+		Container(double time, long sessionId, float xpos, float ypos) : Point(time, xpos, ypos){
+			mSessionId = sessionId;
+			mXSpeed = 0.0f;
+			mYSpeed = 0.0f;
+			mMotionSpeed = 0.0f;
+			mMotionAccel = 0.0f;
+			Point point(mCurrentTime, mXPos, mYPos);
+			mPath.push_back(point);
+			
+			mState = TUIO_ADDED;
 		}
 		
 		virtual ~Container(){};
@@ -63,6 +88,59 @@ namespace cinder { namespace tuio {
 			mYSpeed = yspeed;
 			mMotionSpeed = (float)sqrt(xspeed * xspeed + yspeed * yspeed);
 			mMotionAccel = motionAccel;
+			
+			mPath.pop_back();
+			Point point(mCurrentTime, mXPos, mYPos);
+			mPath.push_back(point);
+			
+			if (mMotionAccel > 0) mState = TUIO_ACCELERATING;
+			else if (mMotionAccel < 0) mState = TUIO_DECELERATING;
+			else mState = TUIO_STOPPED;
+		}
+		
+		virtual void update(double time, float xpos, float ypos){
+			Point lastPoint = mPath.back();
+			Point::update(time, xpos, ypos);
+			
+			double dt = mCurrentTime - lastPoint.getTime();
+			float dx = mXPos - lastPoint.getX();
+			float dy = mYPos - lastPoint.getY();
+			
+			float dist = sqrt(dx * dx + dy * dy);
+			float lastMotionSpeed = mMotionSpeed;
+			
+			mXSpeed = dx / dt;
+			mYSpeed = dy / dt;
+			mMotionSpeed = dist / dt;
+			mMotionAccel = (mMotionSpeed - lastMotionSpeed ) / dt;
+			
+			Point point(mCurrentTime, mXPos, mYPos);
+			mPath.push_back(point);
+			
+			if (mMotionAccel > 0) mState = TUIO_ACCELERATING;
+			else if (mMotionAccel < 0) mState = TUIO_DECELERATING;
+			else mState = TUIO_STOPPED;
+			
+		}
+		
+		virtual void stop(double time){
+			update(time, mXPos, mYPos);
+		}
+		
+		virtual void update(double time, double xpos, double ypos, double xspeed, double yspeed, double motionAccel){
+			Point::update(time, xpos, ypos);
+			
+			mXSpeed = xspeed;
+			mYSpeed = yspeed;
+			mMotionSpeed = (float)sqrt(xspeed * xspeed + yspeed * yspeed);
+			mMotionAccel = motionAccel;
+			
+			Point point(time, xpos, ypos);
+			mPath.push_back(point);
+			
+			if (mMotionAccel > 0) mState = TUIO_ACCELERATING;
+			else if (mMotionAccel < 0) mState = TUIO_DECELERATING;
+			else mState = TUIO_STOPPED;
 		}
 		
 		virtual void update(Container *tuioContainer){
@@ -71,6 +149,18 @@ namespace cinder { namespace tuio {
 			mYSpeed = tuioContainer->getYSpeed();
 			mMotionSpeed = tuioContainer->getMotionSpeed();
 			mMotionAccel = tuioContainer->getMotionAccel();
+			
+			Point point(tuioContainer->getTime(), mXPos, mYPos);
+			mPath.push_back(point);
+			
+			if (mMotionAccel > 0) mState = TUIO_ACCELERATING;
+			else if (mMotionAccel < 0) mState = TUIO_DECELERATING;
+			else mState = TUIO_STOPPED;
+		}
+		
+		virtual void remove(double time) {
+			mCurrentTime = time;
+			mState = TUIO_REMOVED;
 		}
 		
 		virtual long getSessionId()const{
@@ -98,10 +188,26 @@ namespace cinder { namespace tuio {
 			return mMotionAccel;
 		}
 		
+		virtual std::list<Point> getPath(){
+			return mPath;
+		}
+		
+		virtual int getState(){
+			return mState;
+		}
+		
+		virtual bool isMoving(){
+			if ((mState == TUIO_ACCELERATING) || (mState == TUIO_DECELERATING)) return true;
+			else return false;
+		}
+		
 	protected:
 		long mSessionId;
 		float mXSpeed, mYSpeed;
 		float mMotionSpeed, mMotionAccel;
+		std::list<Point> mPath;
+		
+		int mState;
 	};
 
 

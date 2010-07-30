@@ -32,6 +32,8 @@
 
 #include "TuioContainer.h"
 
+#define TUIO_ROTATING 5
+
 namespace cinder { namespace tuio {
 	
 	class Object : public Container {
@@ -39,15 +41,21 @@ namespace cinder { namespace tuio {
 		
 		Object(long sessionId, int fiducialId, float xpos, float ypos, float angle);
 		
+		Object(double time, long sessionId, int fiducialId, float xpos, float ypos, float angle);
+		
 		Object(Object *object);
 		
 		~Object();
 		
 		void update(float xpos, float ypos, float angle, float xspeed, float yspeed, float rotationSpeed, float motionAccel, float rotationAccel);
 		
+		void update(double time, float xpos, float ypos, float angle, float xspeed, float yspeed, float rotationSpeed, float motionAccel, float rotationAccel);
+		
 		void udpate(Object *object);
 		
-		void draw(Vec2f windowSize);
+		void update(double time, float xpos, float ypos, float angle);
+		
+		void draw(int width = 0, int height = 0);
 		
 		int getFiducialId() { 
 			return mFiducialId; 
@@ -69,6 +77,13 @@ namespace cinder { namespace tuio {
 		float getRotationAccel() { 
 			return mRotationAccel; 
 		};
+		
+		virtual bool isMoving(){
+			if ((mState == TUIO_ACCELERATING) || (mState == TUIO_DECELERATING) || (mState == TUIO_ROTATING)) return true;
+			else return false;
+		}
+		
+		void stop(double time);
 		
 	protected:
 		

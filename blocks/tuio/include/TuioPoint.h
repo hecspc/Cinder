@@ -28,6 +28,7 @@
 
 #include "cinder/Cinder.h"
 #include "cinder/CinderMath.h"
+#include "cinder/app/AppBasic.h"
 
 namespace cinder { namespace tuio{
 
@@ -35,13 +36,25 @@ namespace cinder { namespace tuio{
 	public:
 		
 		Point(float xpos, float ypos){
+			app = app::AppBasic::get();
 			mXPos = xpos;
 			mYPos = ypos;
+			mCurrentTime = app->getElapsedSeconds();
+			mStartTime = mCurrentTime;
 		}
 		
 		Point(Point *tuiopoint){
 			mXPos = tuiopoint->getX();
 			mYPos = tuiopoint->getY();
+			mCurrentTime = app->getElapsedSeconds();
+			mStartTime = mCurrentTime;
+		}
+		
+		Point(double time, float xpos, float ypos){
+			mXPos = xpos;
+			mYPos = ypos;
+			mCurrentTime = time;
+			mStartTime = mCurrentTime;
 		}
 		
 		~Point(){};
@@ -51,9 +64,14 @@ namespace cinder { namespace tuio{
 			mYPos = ypos;
 		}
 		
+		void update(double time, float xpos, float ypos){
+			mXPos = xpos;
+			mYPos = ypos;
+			mCurrentTime = time;
+		}
+		
 		
 		void update(Point *tuiopoint){
-		
 			mXPos = tuiopoint->getX();
 			mYPos = tuiopoint->getY();
 		}
@@ -66,6 +84,34 @@ namespace cinder { namespace tuio{
 			return mYPos;
 		}
 		
+		int getScreenX(int width = 0){
+			int pos;
+			if (width == 0){
+				pos = (int)floor(mXPos * app->getWindowWidth() + .5f);
+			}else {
+				pos = (int)floor(mXPos * width + .5f);
+			}
+			return pos;
+		}
+		
+		int getScreenY(int height = 0){
+			int pos;
+			if (height == 0){
+				pos = (int)floor(mYPos * app->getWindowHeight() + .5f);
+			}else {
+				pos = (int)floor(mYPos * height + .5f);
+			}
+			return pos;
+		}
+		
+		double getTime(){
+			return mCurrentTime;
+		}
+		
+		double getStartTime(){
+			return mStartTime;
+		}
+		
 		float getDistance(float x, float y){
 			float dx = mXPos - x;
 			float dy = mYPos - y;
@@ -74,15 +120,12 @@ namespace cinder { namespace tuio{
 		
 		
 		float getDistance(Point *tuiopoint){
-			float dx = mXPos - tuiopoint->getX();
-			float dy = mYPos - tuiopoint->getY();
-			
-			return sqrtf(dx * dx + dy * dy);
+			return getDistance(tuiopoint->getX(), tuiopoint->getY());
 		}
 		
-		float getAngle(Point *tuiopoint, bool degrees = false){
-			float dx = tuiopoint->getX() - mXPos;
-			float dy = tuiopoint->getY() - mYPos;
+		float getAngle(float xpos, float ypos, bool degrees = false){
+			float dx = xpos - mXPos;
+			float dy = ypos - mYPos;
 			
 			float angle = atan2(dx, dy);
 			
@@ -91,13 +134,17 @@ namespace cinder { namespace tuio{
 			}else {
 				return toDegrees(angle);
 			}
-
 		}
 		
+		float getAngle(Point *tuiopoint, bool degrees = false){
+			return getAngle(tuiopoint->getX(), tuiopoint->getY(), degrees);
+		}
 		
 		
 	protected:
 		float mXPos, mYPos;
+		double mStartTime, mCurrentTime;
+		app::AppBasic* app;
 	
 	};
 	

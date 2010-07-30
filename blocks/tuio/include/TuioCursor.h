@@ -27,7 +27,6 @@
 #pragma once
 
 #include "cinder/Cinder.h"
-#include "cinder/Vector.h"
 
 #include "TuioContainer.h"
 #include "cinder/gl/Texture.h"
@@ -40,6 +39,8 @@ namespace cinder { namespace tuio {
 	public:
 		Cursor(long sessionId, int fingerId, float xpos, float ypos);
 		
+		Cursor(double time, long sessionId, int fingerId, float xpos, float ypos);
+		
 		Cursor(Cursor *cursor);
 		
 		~Cursor(){};
@@ -48,7 +49,7 @@ namespace cinder { namespace tuio {
 			return mFingerId;
 		}
 		
-		void draw(Vec2f windowSize);
+		void draw(int width = 0, int height = 0);
 	
 	private:
 		void createLabel();

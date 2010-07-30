@@ -282,19 +282,19 @@ namespace cinder { namespace tuio {
 	}
 
 	
-	void Listener::drawCursors(Vec2f windowSize){
+	void Listener::drawCursors(int width, int height){
 		std::list<Cursor*>::iterator it;
 		for (it = mCursors.begin(); it != mCursors.end(); it++) {
 			Cursor *blob = (*it);
-			blob->draw(windowSize);
+			blob->draw(width, height);
 			
 		}
 	}
-	void Listener::drawObjects(Vec2f windowSize){
+	void Listener::drawObjects(int width, int height){
 		std::list<Object*>::iterator it;
 		for (it = mObjects.begin(); it != mObjects.end(); it++) {
 			Object *blob = (*it);
-			blob->draw(windowSize);
+			blob->draw(width, height);
 		}
 	}
 	

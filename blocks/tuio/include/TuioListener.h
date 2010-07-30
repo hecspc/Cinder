@@ -50,8 +50,8 @@ namespace cinder  { namespace tuio {
 		void disconnect();
 		bool isConnected(){ return mConnected;}
 		
-		void drawCursors(Vec2f windowSize);
-		void drawObjects(Vec2f windowSize);
+		void drawCursors(int width = 0, int height = 0);
+		void drawObjects(int width = 0, int height = 0);
 		
 		std::list<Object*> getTuioObjects();
 		std::list<Cursor*> getTuioCursors();

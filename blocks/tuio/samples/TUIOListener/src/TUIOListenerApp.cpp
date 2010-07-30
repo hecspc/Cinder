@@ -99,8 +99,8 @@ void TUIOListenerApp::draw()
 	
 	gl::setMatricesWindow( getWindowSize() );
 	if (tuio.isConnected()){
-		tuio.drawCursors( Vec2f( getWindowWidth(), getWindowHeight() ) );
-		tuio.drawObjects( Vec2f( getWindowWidth(), getWindowHeight() ) );
+		tuio.drawCursors();
+		tuio.drawObjects();
 	}
 }
 

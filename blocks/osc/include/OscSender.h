@@ -37,6 +37,7 @@ namespace cinder  { namespace osc {
 		Sender();
 		
 		void setup(std::string hostname, int port);
+		void shutdown();
 		
 		void sendMessage(Message& message);
 		void sendBundle(Bundle& bundle);

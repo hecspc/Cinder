@@ -35,8 +35,12 @@ namespace cinder { namespace tuio {
 
 	Cursor::Cursor(long sessionId, int fingerId, float xpos, float ypos) : Container (sessionId, xpos, ypos){
 		mFingerId = fingerId;
-		mXPos = xpos;
-		mYPos = ypos;
+		mRadius = 3 * DEFAULT_RADIUS;
+		createLabel();
+	}
+	
+	Cursor::Cursor(double time, long sessionId, int fingerId, float xpos, float ypos) : Container(time, sessionId, xpos, ypos){
+		mFingerId = fingerId;
 		mRadius = 3 * DEFAULT_RADIUS;
 		createLabel();
 	}
@@ -63,7 +67,7 @@ namespace cinder { namespace tuio {
 		//mTexture = gl::Texture(layout.render(true));
 	}
 	
-	void Cursor::draw(Vec2f windowSize){
+	void Cursor::draw(int width, int height){
 		
 		gl::color(ColorA(1.0f, 1.0f, 1.0f, 0.6f));
 		if (mRadius > DEFAULT_RADIUS){
@@ -71,7 +75,7 @@ namespace cinder { namespace tuio {
 		}else{
 			mRadius = DEFAULT_RADIUS;
 		}
-		gl::drawSolidCircle(Vec2f(mXPos * windowSize.x, mYPos * windowSize.y), mRadius);
+		gl::drawSolidCircle(Vec2f(getScreenX(width), getScreenY(height)), mRadius);
 
 	}
 	
